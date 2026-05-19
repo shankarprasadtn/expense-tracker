@@ -299,3 +299,31 @@ input:focus { outline: none; border-color: var(--primary); background: white; }
 .fab-wrapper { position: relative; top: -25px; }
 .fab { width: 66px; height: 66px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 12px 30px rgba(94, 92, 230, 0.4); color: white; border: 6px solid #F2F2F7; }
 .fab ion-icon { font-size: 34px; color: white !important; }
+
+/* Segmented Control */
+.segmented-control {
+    display: flex;
+    background: #E5E5EA;
+    border-radius: 12px;
+    padding: 3px;
+    margin: 10px 24px 20px 24px;
+}
+
+.seg-btn {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 10px 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-muted);
+    border-radius: 9px;
+    transition: all 0.2s ease;
+}
+
+.seg-btn.selected {
+    background: #FFFFFF;
+    color: var(--text-main);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    font-weight: 600;
+}

@@ -85,8 +85,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnSave = document.getElementById('btn-save-expense');
         const btnPaste = document.getElementById('btn-paste-clipboard');
         const catBtns = document.querySelectorAll('.cat-btn');
+        const segBtns = document.querySelectorAll('.seg-btn');
 
         let selectedCategory = { name: "Food", icon: "🍔" };
+        let selectedPaymentMethod = "UPI"; // Default
+
+        // Payment Method Selection
+        segBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                segBtns.forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                selectedPaymentMethod = btn.dataset.method;
+            });
+        });
 
         // Clipboard Logic
         if (btnPaste) {
@@ -145,6 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 icon: selectedCategory.icon,
                 date: new Date().toISOString().split('T')[0],
                 notes: notesInput.value.trim(),
+                paymentMethod: selectedPaymentMethod,
                 timestamp: new Date().toISOString()
             };
 
@@ -156,11 +168,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const valueRangeBody = {
                     "majorDimension": "ROWS",
                     "values": [
-                        [expense.date, expense.amount, expense.category, expense.notes]
+                        [expense.date, expense.amount, expense.category, expense.notes, expense.paymentMethod]
                     ]
                 };
 
-                fetch(`https://sheets.googleapis.com/v4/spreadsheets/${googleSheetId}/values/A:D:append?valueInputOption=USER_ENTERED`, {
+                fetch(`https://sheets.googleapis.com/v4/spreadsheets/${googleSheetId}/values/A:E:append?valueInputOption=USER_ENTERED`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${googleAccessToken}`,
@@ -234,7 +246,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <div class="t-icon">${exp.icon}</div>
                             <div class="t-details">
                                 <h4>${exp.category}</h4>
-                                <p>${exp.notes ? exp.notes : 'No notes'}</p>
+                                <p>${exp.paymentMethod || 'UPI'} ${exp.notes ? '• ' + exp.notes : ''}</p>
                             </div>
                         </div>
                         <div style="display: flex; align-items: center; gap: 12px;">
@@ -360,6 +372,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                             // Avoid duplicates by checking timestamp or exact same amount/date combo
                             const exists = expenses.some(e => e.timestamp === timestamp || (e.amount === amount && e.date === date && e.category === category && e.notes === notes));
+                            
                             if (!exists) {
                                 expenses.push({
                                     id: id,
@@ -368,6 +381,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     icon: icon,
                                     date: date,
                                     notes: notes,
+                                    paymentMethod: row['Payment Method'] || 'UPI',
                                     timestamp: timestamp
                                 });
                                 importedCount++;
@@ -486,7 +500,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="t-icon">${exp.icon}</div>
                     <div class="t-details">
                         <h4>${exp.category}</h4>
-                        <p>${dateStr} ${exp.notes ? '• ' + exp.notes : ''}</p>
+                        <p>${dateStr} • ${exp.paymentMethod || 'UPI'} ${exp.notes ? '• ' + exp.notes : ''}</p>
                     </div>
                 </div>
                 <div style="display: flex; align-items: center; gap: 12px;">
@@ -601,6 +615,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = expenses.map(e => ({
             Date: e.date,
             Category: e.category,
+            'Payment Method': e.paymentMethod || 'UPI',
             Amount: e.amount,
             Notes: e.notes || "",
             Timestamp: e.timestamp
