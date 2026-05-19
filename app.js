@@ -352,6 +352,11 @@ document.addEventListener('DOMContentLoaded', () => {
                             else if (category === "Shopping") icon = "🛍️";
                             else if (category === "Bills") icon = "🧾";
                             else if (category === "Entertainment") icon = "🎬";
+                            else if (category === "Groceries") icon = "🛒";
+                            else if (category === "Health") icon = "💊";
+                            else if (category === "Travel") icon = "✈️";
+                            else if (category === "Education") icon = "📚";
+                            else if (category === "Personal") icon = "💅";
 
                             // Avoid duplicates by checking timestamp or exact same amount/date combo
                             const exists = expenses.some(e => e.timestamp === timestamp || (e.amount === amount && e.date === date && e.category === category && e.notes === notes));
@@ -542,6 +547,11 @@ document.addEventListener('DOMContentLoaded', () => {
             'Shopping': '#AF52DE',
             'Bills': '#FF3B30',
             'Entertainment': '#5AC8FA',
+            'Groceries': '#007AFF',
+            'Health': '#FF2D55',
+            'Travel': '#5856D6',
+            'Education': '#FFCC00',
+            'Personal': '#FF453A',
             'Other': '#8E8E93'
         };
 
