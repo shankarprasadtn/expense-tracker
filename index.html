@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Expense Tracker</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#F2F2F7">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Main Content Area -->
+        <main id="main-content">
+            <!-- Views dynamically injected here -->
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-view="dashboard">
+                <ion-icon name="pie-chart"></ion-icon>
+                <span>Insights</span>
+            </button>
+            <button class="nav-item" data-view="history">
+                <ion-icon name="list"></ion-icon>
+                <span>History</span>
+            </button>
+            <button class="nav-item" data-view="add">
+                <div class="fab-wrapper">
+                    <div class="fab">
+                        <ion-icon name="add"></ion-icon>
+                    </div>
+                </div>
+            </button>
+            <button class="nav-item" data-view="settings">
+                <ion-icon name="settings"></ion-icon>
+                <span>Settings</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- View Templates -->
+    <template id="view-dashboard">
+        <div class="view-container">
+            <header class="bubbly-header">
+                <h1>Overview</h1>
+                <p class="subtitle">Your financial health</p>
+            </header>
+            <div class="content-scroll" style="padding-top: 0;">
+                <div class="bubbly-card balance-card">
+                    <h2>Total Spent</h2>
+                    <h3 id="total-spent" class="amount">₹0</h3>
+                    <p class="month-label">This Month</p>
+                </div>
+                
+                <div class="bubbly-card chart-container">
+                    <h3 style="margin-bottom: 8px;">Spending by Category</h3>
+                    <div id="category-breakdown-list" class="category-breakdown">
+                        <!-- Breakdown injected here -->
+                    </div>
+                </div>
+
+                <div style="margin-top: 32px;">
+                    <h3>Recent Transactions</h3>
+                    <ul id="transaction-list" class="transaction-list">
+                        <!-- Transactions injected here -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="view-add">
+        <div class="view-container add-expense-view">
+            <div class="add-expense-scroll">
+                <div class="add-header-area">
+                    <span class="currency-prefix">₹</span>
+                    <input type="text" inputmode="decimal" id="amount" class="numpad-display-input" placeholder="0">
+                </div>
+
+                <div class="category-scroller" id="category-selector">
+                    <button class="cat-btn selected" data-cat="Food" data-icon="🍔">
+                        <span class="icon">🍔</span><span class="label">Food</span>
+                    </button>
+                    <button class="cat-btn" data-cat="Transport" data-icon="🚗">
+                        <span class="icon">🚗</span><span class="label">Transport</span>
+                    </button>
+                    <button class="cat-btn" data-cat="Shopping" data-icon="🛍️">
+                        <span class="icon">🛍️</span><span class="label">Shopping</span>
+                    </button>
+                    <button class="cat-btn" data-cat="Bills" data-icon="🧾">
+                        <span class="icon">🧾</span><span class="label">Bills</span>
+                    </button>
+                    <button class="cat-btn" data-cat="Entertainment" data-icon="🎬">
+                        <span class="icon">🎬</span><span class="label">Entertainment</span>
+                    </button>
+                    <button class="cat-btn" data-cat="Other" data-icon="✨">
+                        <span class="icon">✨</span><span class="label">Other</span>
+                    </button>
+                </div>
+
+                <input type="text" id="add-notes" class="add-notes-input" placeholder="What was this for? (Optional)">
+                
+                <button id="btn-paste-clipboard" class="btn-secondary" style="margin: 0 24px 10px 24px; width: calc(100% - 48px); padding: 12px; font-size: 14px;">
+                    <ion-icon name="clipboard-outline"></ion-icon> Auto-Fill from SMS (Clipboard)
+                </button>
+
+                <button id="btn-save-expense" class="btn-primary" style="margin: 10px 24px 20px 24px; width: calc(100% - 48px); font-size: 20px; box-shadow: 0 10px 30px rgba(94, 92, 230, 0.3);">Save Expense</button>
+            </div>
+        </div>
+    </template>
+
+    <template id="view-history">
+        <div class="view-container">
+            <header class="bubbly-header" style="position: relative;">
+                <h1>History</h1>
+                <p class="subtitle">All your expenses</p>
+                <button id="btn-quick-export" title="Export Excel" style="position: absolute; top: 60px; right: 24px; background: var(--primary-light); color: var(--primary); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: var(--card-shadow);">
+                    <ion-icon name="document-text" style="font-size: 22px;"></ion-icon>
+                </button>
+            </header>
+            <div class="content-scroll" style="padding-top: 0;">
+                <div id="history-list">
+                    <!-- Grouped transactions injected here -->
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="view-settings">
+        <div class="view-container">
+            <header class="bubbly-header">
+                <h1>Settings</h1>
+                <p class="subtitle">Configure your app</p>
+            </header>
+            <div class="content-scroll" style="padding-top: 0;">
+                <div class="bubbly-card settings-card">
+                    <h2>Data Management</h2>
+                    <input type="file" id="file-import" accept=".xlsx, .xls, .csv" style="display: none;">
+                    <div style="display: flex; gap: 10px; margin-bottom: 16px;">
+                        <button id="btn-import-data" class="btn-secondary" style="flex: 1;">
+                            <ion-icon name="push-outline"></ion-icon> Import
+                        </button>
+                        <button id="btn-export-excel" class="btn-secondary" style="flex: 1;">
+                            <ion-icon name="document-text-outline"></ion-icon> Export
+                        </button>
+                    </div>
+                    <button id="btn-clear-data" class="btn-danger">
+                        <ion-icon name="trash-outline"></ion-icon> Clear All Data
+                    </button>
+                </div>
+
+                <div class="bubbly-card form-card">
+                    <h2>Direct Google Sync</h2>
+                    <p class="subtitle" style="margin-bottom: 12px; font-size: 13px;">Connect directly to Google Sheets API without webhooks.</p>
+                    
+                    <div class="input-group">
+                        <label for="google-client-id">Google Client ID</label>
+                        <input type="text" id="google-client-id" placeholder="12345...apps.googleusercontent.com">
+                    </div>
+                    <div class="input-group">
+                        <label for="google-sheet-id">Spreadsheet ID</label>
+                        <input type="text" id="google-sheet-id" placeholder="1BxiMVs0XRY...">
+                    </div>
+                    
+                    <button id="btn-save-google" class="btn-primary" style="margin-bottom: 20px;">Save Credentials</button>
+                    
+                    <div id="google-auth-container" style="text-align: center; border-top: 1px solid #E5E5EA; padding-top: 20px;">
+                        <button id="btn-google-login" class="btn-secondary" style="margin-bottom: 8px;">
+                            <ion-icon name="logo-google"></ion-icon> Sign in with Google
+                        </button>
+                        <button id="btn-google-logout" class="btn-danger" style="display: none; margin-bottom: 8px;">
+                            Sign Out
+                        </button>
+                        <p id="google-auth-status" style="font-size: 12px; color: var(--text-muted);">Not signed in</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script src="app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => console.log('ServiceWorker registered:', registration.scope))
+                    .catch(err => console.log('ServiceWorker registration failed:', err));
+            });
+        }
+    </script>
+</body>
+</html>
