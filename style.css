@@ -333,3 +333,10 @@ input:focus { outline: none; border-color: var(--primary); background: white; }
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     font-weight: 600;
 }
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    100% { transform: rotate(360deg); }
+}

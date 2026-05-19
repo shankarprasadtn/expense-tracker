@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         tokenClient = google.accounts.oauth2.initTokenClient({
             client_id: googleClientId,
-            scope: 'https://www.googleapis.com/auth/spreadsheets',
+            scope: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file',
             callback: (tokenResponse) => {
                 if (tokenResponse && tokenResponse.access_token) {
                     googleAccessToken = tokenResponse.access_token;
@@ -282,6 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const authStatus = document.getElementById('google-auth-status');
         
         const btnExport = document.getElementById('btn-export-excel');
+        const btnExportDrive = document.getElementById('btn-export-drive');
         const btnImport = document.getElementById('btn-import-data');
         const fileImport = document.getElementById('file-import');
 
@@ -308,7 +309,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         updateGoogleUI();
 
-        btnExport.addEventListener('click', exportToExcel);
+        if (btnExport) btnExport.addEventListener('click', exportToExcel);
+        if (btnExportDrive) btnExportDrive.addEventListener('click', uploadToGoogleDrive);
 
         if (btnImport && fileImport) {
             btnImport.addEventListener('click', () => {
@@ -630,15 +632,87 @@ document.addEventListener('DOMContentLoaded', () => {
                     return; // Successfully opened share sheet
                 }
             } catch (err) {
-                console.log("Share failed, falling back to download", err);
+                console.error("Share failed", err);
             }
         }
 
-        // Fallback standard download
+        // Fallback to direct download
         XLSX.writeFile(workbook, fileName);
     }
 
-    // --- Boot ---
-    // Start by rendering Dashboard
+    async function uploadToGoogleDrive() {
+        if (!googleAccessToken) {
+            alert("Please sign in to Google first.");
+            return;
+        }
+
+        if (expenses.length === 0) {
+            alert("No data to export.");
+            return;
+        }
+
+        const btn = document.getElementById('btn-export-drive');
+        if(btn) {
+            btn.dataset.original = btn.innerHTML;
+            btn.innerHTML = '<ion-icon name="sync-outline" class="spin"></ion-icon> Uploading...';
+            btn.disabled = true;
+        }
+
+        try {
+            const data = expenses.map(e => ({
+                Date: e.date,
+                Category: e.category,
+                'Payment Method': e.paymentMethod || 'UPI',
+                Amount: e.amount,
+                Notes: e.notes || "",
+                Timestamp: e.timestamp
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(data);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Expenses");
+
+            const fileName = `ExpenseData_${new Date().toISOString().split('T')[0]}.xlsx`;
+            const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+            const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+            const metadata = {
+                name: fileName,
+                mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            };
+
+            const form = new FormData();
+            form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+            form.append('file', blob);
+
+            const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${googleAccessToken}`
+                },
+                body: form
+            });
+
+            if (response.ok) {
+                alert("Successfully uploaded to Google Drive!");
+            } else {
+                const err = await response.text();
+                alert("Upload failed: " + err);
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Error uploading to Google Drive.");
+        } finally {
+            if(btn) {
+                btn.innerHTML = btn.dataset.original;
+                btn.disabled = false;
+            }
+        }
+    }
+
+    // --- Init ---
+    initSettings();
+    initAddExpense();
     renderView('dashboard');
+
 });
