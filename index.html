@@ -92,40 +92,20 @@
                     <input type="text" inputmode="decimal" id="amount" class="numpad-display-input" placeholder="0">
                 </div>
 
-                <div class="category-scroller" id="category-selector">
-                    <button class="cat-btn selected" data-cat="Food" data-icon="🍔">
-                        <span class="icon">🍔</span><span class="label">Food</span>
-                    </button>
-                    <button class="cat-btn" data-cat="Transport" data-icon="🚗">
-                        <span class="icon">🚗</span><span class="label">Transport</span>
-                    </button>
-                    <button class="cat-btn" data-cat="Shopping" data-icon="🛍️">
-                        <span class="icon">🛍️</span><span class="label">Shopping</span>
-                    </button>
-                    <button class="cat-btn" data-cat="Bills" data-icon="🧾">
-                        <span class="icon">🧾</span><span class="label">Bills</span>
-                    </button>
-                    <button class="cat-btn" data-cat="Entertainment" data-icon="🎬">
-                        <span class="icon">🎬</span><span class="label">Entertainment</span>
-                    </button>
-                    <button class="cat-btn" data-cat="Groceries" data-icon="🛒">
-                        <span class="icon">🛒</span><span class="label">Groceries</span>
-                    </button>
-                    <button class="cat-btn" data-cat="Health" data-icon="💊">
-                        <span class="icon">💊</span><span class="label">Health</span>
-                    </button>
-                    <button class="cat-btn" data-cat="Travel" data-icon="✈️">
-                        <span class="icon">✈️</span><span class="label">Travel</span>
-                    </button>
-                    <button class="cat-btn" data-cat="Education" data-icon="📚">
-                        <span class="icon">📚</span><span class="label">Education</span>
-                    </button>
-                    <button class="cat-btn" data-cat="Personal" data-icon="💅">
-                        <span class="icon">💅</span><span class="label">Personal</span>
-                    </button>
-                    <button class="cat-btn" data-cat="Other" data-icon="✨">
-                        <span class="icon">✨</span><span class="label">Other</span>
-                    </button>
+                <div style="padding: 10px 24px;">
+                    <select id="category-select" class="category-dropdown">
+                        <option value="Food" data-icon="🍔">🍔 Food</option>
+                        <option value="Transport" data-icon="🚗">🚗 Transport</option>
+                        <option value="Shopping" data-icon="🛍️">🛍️ Shopping</option>
+                        <option value="Bills" data-icon="🧾">🧾 Bills</option>
+                        <option value="Entertainment" data-icon="🎬">🎬 Entertainment</option>
+                        <option value="Groceries" data-icon="🛒">🛒 Groceries</option>
+                        <option value="Health" data-icon="💊">💊 Health</option>
+                        <option value="Travel" data-icon="✈️">✈️ Travel</option>
+                        <option value="Education" data-icon="📚">📚 Education</option>
+                        <option value="Personal" data-icon="💅">💅 Personal</option>
+                        <option value="Other" data-icon="✨">✨ Other</option>
+                    </select>
                 </div>
 
                 <div class="segmented-control" id="payment-method-selector">

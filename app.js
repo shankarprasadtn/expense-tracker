@@ -84,10 +84,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const notesInput = document.getElementById('add-notes');
         const btnSave = document.getElementById('btn-save-expense');
         const btnPaste = document.getElementById('btn-paste-clipboard');
-        const catBtns = document.querySelectorAll('.cat-btn');
+        const categorySelect = document.getElementById('category-select');
         const segBtns = document.querySelectorAll('.seg-btn');
 
-        let selectedCategory = { name: "Food", icon: "🍔" };
         let selectedPaymentMethod = "UPI"; // Default
 
         // Payment Method Selection
@@ -113,8 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         amountInput.value = parsedRaw;
                         
                         // Default to Other for SMS
-                        const otherBtn = Array.from(catBtns).find(b => b.dataset.cat === 'Other');
-                        if(otherBtn) otherBtn.click();
+                        if (categorySelect) categorySelect.value = "Other";
                         
                         notesInput.value = "Bank SMS";
                     } else {
@@ -125,19 +123,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
-
-        // Category Selection
-        catBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                catBtns.forEach(b => b.classList.remove('selected'));
-                btn.classList.add('selected');
-                selectedCategory = {
-                    name: btn.dataset.cat,
-                    icon: btn.dataset.icon
-                };
-            });
-        });
-
         // Save Logic
         btnSave.addEventListener('click', () => {
             // Strip out commas, spaces, or any other weird characters from the input
@@ -149,11 +134,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            const selectedOption = categorySelect ? categorySelect.options[categorySelect.selectedIndex] : null;
+
             const expense = {
                 id: Date.now().toString(),
                 amount: amount,
-                category: selectedCategory.name,
-                icon: selectedCategory.icon,
+                category: categorySelect ? categorySelect.value : "Other",
+                icon: selectedOption ? selectedOption.dataset.icon : "✨",
                 date: new Date().toISOString().split('T')[0],
                 notes: notesInput.value.trim(),
                 paymentMethod: selectedPaymentMethod,
